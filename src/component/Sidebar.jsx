@@ -101,8 +101,8 @@ export default function Sidebar(props) {
             <div className={`p-4 pb-4 flex justify-center items-center gap-3`}>
                 <div>
                     {props.expanded
-                        ? <h3 className='text-white font-bold text-4xl'>Election</h3>
-                        : <div className="bg-white w-12 h-12 rounded-full flex justify-center items-center shadow-lg"><h3 className='text-dark font-bold text-4xl'>E</h3></div>
+                        ? <h3 className='text-white font-bold text-4xl'>GEO Election</h3>
+                        : <div className="bg-white w-12 h-12 rounded-full flex justify-center items-center shadow-lg"><h3 className='text-dark font-bold text-4xl'>G</h3></div>
                     }
                 </div>
             </div>
