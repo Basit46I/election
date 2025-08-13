@@ -4,3 +4,18 @@
 @theme{
     --font-poppins: 'Poppins', 'sans-serif';
 }
+
+.sidebar {
+  position: absolute; /* or fixed if you want it to stay in place */
+  top: 0;
+  left: 0;
+  width: 250px; /* adjust */
+  height: 100%;
+  background: white;
+  z-index: 1000; /* must be higher than the map */
+  box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+}
+
+.leaflet-container {
+  z-index: 1;
+}

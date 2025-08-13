@@ -1,19 +1,25 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import './App.css'
-import Sidebar from "./component/Sidebar";
-import { useState } from "react";
+import { useState } from "react"
+import Sidebar from "./component/Sidebar"
+import ElectionMap from "./component/ElectionMap"
 
 function App() {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(true)
+  const [filters, setFilters] = useState({ parties: "", area: "", subArea: "" })
 
   return (
     <div className="font-poppins">
-      <Router>
-        <Sidebar expanded={expanded} setExpanded={setExpanded} />
-        <Routes>
-          <Route exact />
-        </Routes>
-      </Router>
+      <div className="flex">
+        <Sidebar
+          expanded={expanded}
+          setExpanded={setExpanded}
+          list={filters}
+          setList={setFilters}
+        />
+        <div className="flex-1 ml-22 md:ml-90"> {/* keeps map clear of fixed sidebar */}
+          <ElectionMap selectedFilters={filters} />
+        </div>
+      </div>
     </div>
   )
 }
