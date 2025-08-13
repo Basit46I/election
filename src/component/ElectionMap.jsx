@@ -3,6 +3,9 @@ import "leaflet/dist/leaflet.css"
 import L from "leaflet"
 import { useEffect, useMemo } from "react"
 import { mapData } from "../data/mapData"
+import "leaflet/dist/leaflet.css";
+import "../utils/fixLeafletIcon"; // adjust the path if needed
+
 
 // Helper: fit to bounds of many polygons
 function FitToBounds({ items }) {
