@@ -72,14 +72,14 @@ export default function Sidebar({ list, setList, expanded, setExpanded }) {
                 </div>
 
                 <div className="pl-4 pt-4">
-                    <h3 className='text-white font-bold text-2xl'>Tracking result</h3>
+                    {expanded ? (<h3 className='text-white font-bold text-2xl'>Tracking result</h3>) : ""}
                 </div>
 
                 {/* Filters */}
                 <div className="p-4 space-y-8">
                     {/* Party */}
                     <div>
-                        <h3 className="text-white text-sm mb-2">Filter by Party</h3>
+                        <h3 className="text-white text-sm mb-2">{expanded ? "Filter by Party" : "Party"}</h3>
                         <select
                             className="w-full bg-white text-sm outline-none px-3 py-2.5 focus:ring-2 focus:ring-blue-500"
                             value={list.parties}
@@ -94,7 +94,7 @@ export default function Sidebar({ list, setList, expanded, setExpanded }) {
 
                     {/* Area */}
                     <div>
-                        <h3 className="text-white text-sm mb-2">Filter by Area</h3>
+                        <h3 className="text-white text-sm mb-2">{expanded ? "Filter by Area" : "Area"}</h3>
                         <select
                             className="w-full bg-white text-sm outline-none px-3 py-2.5 focus:ring-2 focus:ring-blue-500"
                             value={list.area}
@@ -110,7 +110,7 @@ export default function Sidebar({ list, setList, expanded, setExpanded }) {
 
                     {/* Sub Area */}
                     <div>
-                        <h3 className="text-white text-sm mb-2">Filter by Sub Area</h3>
+                        <h3 className="text-white text-sm mb-2">{expanded ? "Filter by Sub Area" : "Sub Area"}</h3>
                         <select
                             className="w-full bg-white text-sm outline-none px-3 py-2.5 focus:ring-2 focus:ring-blue-500"
                             value={list.subArea}
