@@ -16,7 +16,7 @@ function App() {
           list={filters}
           setList={setFilters}
         />
-        <div className="flex-1 ml-22 md:ml-90"> {/* keeps map clear of fixed sidebar */}
+        <div className={`flex-1 ${expanded ? 'md:ml-90' : 'md:ml-25'} ml-0`}>
           <ElectionMap selectedFilters={filters} />
         </div>
       </div>
