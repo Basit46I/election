@@ -1,5 +1,6 @@
-import { ChevronLeft, ChevronRight, Filter } from 'lucide-react'
 import { useState } from 'react'
+import { FiFilter } from 'react-icons/fi';
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 
 const parties = [
     { value: "jip", label: "Jamaat-e-Islami Pakistan (JIP)" },
@@ -26,7 +27,7 @@ const subArea = {
     ]
 }
 
-export default function Sidebar({ list, setList, expanded, setExpanded }) {
+export default function Sidebar({ list, setList, expanded, setExpanded, mobileOpen, setMobileOpen }) {
     const [filteredArea, setFilteredArea] = useState([])
     const [filteredSubArea, setFilteredSubArea] = useState([])
 
@@ -52,36 +53,21 @@ export default function Sidebar({ list, setList, expanded, setExpanded }) {
     return (
         <>
             {/* DESKTOP SIDEBAR */}
-            <div className={`h-screen fixed left-0 top-0 bg-[#242831] shadow-lg z-50 hidden md:block transition-all ${expanded ? "w-90" : "w-25"}`}>
-                {/* Toggle */}
-                <div className="p-1 relative">
-                    <button
-                        type="button"
-                        onClick={() => setExpanded(!expanded)}
-                        className="absolute top-6 -right-4 w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-[#242831] hover:text-white transition-all"
-                    >
-                        {expanded ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
-                    </button>
+            <div
+                className={`fixed top-0 left-0 h-full w-90 bg-[#242831] z-50
+    transform transition-transform duration-300 hidden lg:block
+    ${expanded ? "translate-x-0" : "-translate-x-full"}`}
+            >
+                <div className="p-4 flex justify-between items-center border-b border-gray-700">
+                    <h3 className="text-white font-semibold text-2xl">Geo Election</h3>
                 </div>
 
-                {/* Logo */}
-                <div className="p-4 pb-4 flex justify-center items-center gap-3">
-                    {expanded
-                        ? <h3 className='text-white font-bold text-4xl'>GEO Election</h3>
-                        : <div className="bg-white w-12 h-12 rounded-full flex justify-center items-center shadow-lg"><h3 className='text-dark font-bold text-4xl'>G</h3></div>}
-                </div>
-
-                <div className="pl-4 pt-4">
-                    {expanded ? (<h3 className='text-white font-bold text-2xl'>Tracking result</h3>) : ""}
-                </div>
-
-                {/* Filters */}
-                <div className="p-4 space-y-8">
+                <div className="p-4 space-y-6 overflow-y-auto">
                     {/* Party */}
                     <div>
-                        <h3 className="text-white text-sm mb-2">{expanded ? "Filter by Party" : "Party"}</h3>
+                        <h3 className="text-white text-sm mb-2">Filter by Party</h3>
                         <select
-                            className="w-full bg-white text-sm outline-none px-3 py-2.5 focus:ring-2 focus:ring-blue-500"
+                            className="w-full bg-white text-sm outline-none px-3 py-2.5"
                             value={list.parties}
                             onChange={partyOnChange}
                         >
@@ -94,9 +80,9 @@ export default function Sidebar({ list, setList, expanded, setExpanded }) {
 
                     {/* Area */}
                     <div>
-                        <h3 className="text-white text-sm mb-2">{expanded ? "Filter by Area" : "Area"}</h3>
+                        <h3 className="text-white text-sm mb-2">Filter by Area</h3>
                         <select
-                            className="w-full bg-white text-sm outline-none px-3 py-2.5 focus:ring-2 focus:ring-blue-500"
+                            className="w-full bg-white text-sm outline-none px-3 py-2.5"
                             value={list.area}
                             onChange={areaOnChange}
                             disabled={!list.parties}
@@ -110,9 +96,69 @@ export default function Sidebar({ list, setList, expanded, setExpanded }) {
 
                     {/* Sub Area */}
                     <div>
-                        <h3 className="text-white text-sm mb-2">{expanded ? "Filter by Sub Area" : "Sub Area"}</h3>
+                        <h3 className="text-white text-sm mb-2">Filter by Sub Area</h3>
                         <select
-                            className="w-full bg-white text-sm outline-none px-3 py-2.5 focus:ring-2 focus:ring-blue-500"
+                            className="w-full bg-white text-sm outline-none px-3 py-2.5"
+                            value={list.subArea}
+                            onChange={subAreaOnChange}
+                            disabled={!list.area}
+                        >
+                            <option value="">Select area first</option>
+                            {filteredSubArea.map((item, i) => (
+                                <option key={i} value={item.value}>{item.label}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            {/* MOBILE SIDEBAR */}
+            <div
+                className={`fixed top-0 left-0 h-full w-90 bg-[#242831] shadow-2xl z-50 transform transition-transform duration-300 lg:hidden
+                ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
+            >
+                <div className="p-4 flex justify-between items-center border-b border-gray-700">
+                    <h3 className="text-white font-semibold text-2xl">Geo Election</h3>
+                    <button onClick={() => setMobileOpen(false)} className="text-white text-xl">✕</button>
+                </div>
+
+                <div className="p-4 space-y-6 overflow-y-auto">
+                    {/* Party */}
+                    <div>
+                        <h3 className="text-white text-sm mb-2">Filter by Party</h3>
+                        <select
+                            className="w-full bg-white text-sm outline-none px-3 py-2.5"
+                            value={list.parties}
+                            onChange={partyOnChange}
+                        >
+                            <option value="">All Parties</option>
+                            {parties.map((item, i) => (
+                                <option key={i} value={item.value}>{item.label}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Area */}
+                    <div>
+                        <h3 className="text-white text-sm mb-2">Filter by Area</h3>
+                        <select
+                            className="w-full bg-white text-sm outline-none px-3 py-2.5"
+                            value={list.area}
+                            onChange={areaOnChange}
+                            disabled={!list.parties}
+                        >
+                            <option value="">Select party first</option>
+                            {filteredArea.map((item, i) => (
+                                <option key={i} value={item.value}>{item.label}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Sub Area */}
+                    <div>
+                        <h3 className="text-white text-sm mb-2">Filter by Sub Area</h3>
+                        <select
+                            className="w-full bg-white text-sm outline-none px-3 py-2.5"
                             value={list.subArea}
                             onChange={subAreaOnChange}
                             disabled={!list.area}
@@ -127,45 +173,34 @@ export default function Sidebar({ list, setList, expanded, setExpanded }) {
             </div>
 
             {/* MOBILE BOTTOM BAR */}
-            <div className="fixed left-0 bottom-5 w-full p-3 md:hidden z-50">
-                <div className="w-full bg-[#242831] shadow-lg p-3 flex justify-between rounded-lg">
-
-                    <div>
-                        <h3 className="text-white text-xs mb-2">Filter by Party</h3>
-                        <select
-                            className="w-35 bg-white text-xs px-2 py-1 rounded"
-                            value={list.parties}
-                            onChange={partyOnChange}
+            <div className="fixed bottom-0 w-full lg:hidden z-40">
+                <div className="w-full bg-[#242831] shadow-lg flex">
+                    <div className="flex-1 border-r border-white">
+                        <button
+                            type='button'
+                            className="w-full text-white text-[13px] flex items-center justify-center gap-2 py-2 hover:text-black hover:bg-white transition duration-100"
+                            onClick={() => setMobileOpen(true)}
                         >
-                            <option value="">Party</option>
-                            {parties.map((p, i) => <option key={i} value={p.value}>{p.label}</option>)}
-                        </select>
+                            <FiFilter size={14} /> Party
+                        </button>
                     </div>
-
-                    <div>
-                        <h3 className="text-white text-xs mb-2">Filter by Area</h3>
-                        <select
-                            className="w-35 bg-white text-xs px-2 py-1 rounded"
-                            value={list.area}
-                            onChange={areaOnChange}
-                            disabled={!list.parties}
+                    <div className="flex-1 border-r border-white">
+                        <button
+                            type='button'
+                            className="w-full text-white text-[13px] flex items-center justify-center gap-2 py-2 hover:text-black hover:bg-white transition duration-100"
+                            onClick={() => setMobileOpen(true)}
                         >
-                            <option value="">Area</option>
-                            {filteredArea.map((a, i) => <option key={i} value={a.value}>{a.label}</option>)}
-                        </select>
+                            <FiFilter size={14} /> Area
+                        </button>
                     </div>
-
-                    <div>
-                        <h3 className="text-white text-xs mb-2">Filter by Sub area</h3>
-                        <select
-                            className="w-35 bg-white text-xs px-2 py-1 rounded"
-                            value={list.subArea}
-                            onChange={subAreaOnChange}
-                            disabled={!list.area}
+                    <div className="flex-1">
+                        <button
+                            type='button'
+                            className="w-full text-white text-[13px] flex items-center justify-center gap-2 py-2 hover:text-black hover:bg-white transition duration-100"
+                            onClick={() => setMobileOpen(true)}
                         >
-                            <option value="">Sub Area</option>
-                            {filteredSubArea.map((sa, i) => <option key={i} value={sa.value}>{sa.label}</option>)}
-                        </select>
+                            <FiFilter size={14} /> Sub Area
+                        </button>
                     </div>
                 </div>
             </div>

@@ -70,8 +70,8 @@ export const mapData = [
             
         ],
         pollingStations: [
-            { name: "Dow International Dental College & Hospital", coordinates: [24.930718957773653, 67.12147076700502] },
-            { name: "Ahsan Medical Center", coordinates: [24.926048899850567, 67.1202798661942] }
+            { name: "Polling Station 1: Dow International Dental College & Hospital", coordinates: [24.930718957773653, 67.12147076700502] },
+            { name: "Polling Station 2: Ahsan Medical Center", coordinates: [24.926048899850567, 67.1202798661942] }
         ]
     },
     {

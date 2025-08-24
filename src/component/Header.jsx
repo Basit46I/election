@@ -1,0 +1,121 @@
+import { useState, useRef, useEffect } from "react"
+import { BiMenu, BiSearch } from "react-icons/bi"
+import { mapData } from "../data/mapData"
+
+export default function Header({ expanded, setExpanded, onSearchSelect }) {
+    const [searchOpen, setSearchOpen] = useState(false)
+    const [query, setQuery] = useState("")
+    const [results, setResults] = useState([])
+    const [loading, setLoading] = useState(false) // 👈 loader state
+    const searchRef = useRef(null)
+
+    // 🔍 Handle input change
+    const handleSearch = (e) => {
+        const value = e.target.value
+        setQuery(value)
+        setLoading(true) // start loading
+        setResults([])
+
+        if (!value.trim()) {
+            setLoading(false)
+            setResults([])
+            return
+        }
+
+        // Simulate async search (like API call)
+        setTimeout(() => {
+            const filtered = mapData.filter(
+                (item) =>
+                    item.partyLabel.toLowerCase().includes(value.toLowerCase()) ||
+                    item.areaLabel.toLowerCase().includes(value.toLowerCase()) ||
+                    item.subAreaLabel.toLowerCase().includes(value.toLowerCase())
+            )
+            setResults(filtered)
+            setLoading(false) // stop loading
+        }, 500) // 0.5s delay
+    }
+
+    // ✅ When user selects a result
+    const handleSelect = (item) => {
+        setQuery("")
+        setResults([])
+        setSearchOpen(false)
+        if (onSearchSelect) onSearchSelect(item)
+    }
+
+    // 📌 Close dropdown on outside click
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (searchRef.current && !searchRef.current.contains(e.target)) {
+                setSearchOpen(false)
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside)
+        return () => document.removeEventListener("mousedown", handleClickOutside)
+    }, [])
+
+    return (
+        <div
+            className={`
+                fixed top-0 right-0 flex items-center justify-between z-40 shadow-sm
+                bg-white p-3 transition-all duration-300
+                ${expanded ? "left-0 lg:left-90" : "left-0 w-full"}
+            `}
+        >
+            {/* Toggle Sidebar */}
+            <button
+                onClick={() => setExpanded((prev) => !prev)}
+                className="lg:block hidden text-dark p-1 hover:bg-[#4b4b4b] hover:text-white rounded-full"
+            >
+                <BiMenu size={20} />
+            </button>
+
+            {/* Search */}
+            <div className="relative flex-1 flex justify-end" ref={searchRef}>
+                <div className="bg-white px-3 py-2 flex items-center gap-3 border border-gray-500 lg:w-100 w-full">
+                    <input
+                        type="text"
+                        value={query}
+                        onChange={handleSearch}
+                        onFocus={() => setSearchOpen(true)}   // 👈 open when clicked
+                        placeholder="Search party, area, or subarea..."
+                        className="w-full text-sm outline-none text-gray-700"
+                    />
+                    {loading ? (
+                        <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                        <BiSearch size={20} className="text-gray-500" />
+                    )}
+                </div>
+
+                {/* Dropdown Results */}
+                {searchOpen && (
+                    <div className="absolute top-14 right-0 bg-white shadow-2xl lg:w-100 w-full max-h-64 overflow-y-auto z-50">
+                        {loading ? (
+                            <div className="px-3 py-4 text-sm text-gray-500 flex justify-center">
+                                <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                            </div>
+                        ) : results.length > 0 ? (
+                            results.map((item, i) => (
+                                <div
+                                    key={i}
+                                    onClick={() => handleSelect(item)}
+                                    className="px-3 py-2 text-sm border-b border-gray-300 hover:bg-gray-100 cursor-pointer"
+                                >
+                                    <div className="font-semibold">{item.partyLabel}</div>
+                                    <div className="text-gray-600">
+                                        {item.areaLabel} → {item.subAreaLabel}
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="px-3 py-2 text-sm text-xs text-center text-gray-500">
+                                No data found
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+        </div>
+    )
+}
