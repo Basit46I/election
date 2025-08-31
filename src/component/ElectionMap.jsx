@@ -20,8 +20,6 @@ import { renderToStaticMarkup } from "react-dom/server"
 const partyColors = {
     jip: "#157a35",
     mqm: "#ff7f0e",
-    ppp: "#d62728",
-    pti: "#1f77b4",
 }
 
 // ✅ Function to generate custom React Icon marker per party
@@ -30,7 +28,7 @@ function getPartyIcon(party) {
         html: renderToStaticMarkup(
             <div
                 style={{
-                    color: partyColors[party] || "#333",
+                    color: "#189fedff",
                     fontSize: "22px",
                     display: "flex",
                     alignItems: "center",
@@ -116,14 +114,21 @@ export default function ElectionMap({ selectedFilters, searchSelection }) {
     const { parties, area, subArea } = selectedFilters
 
     // If searchSelection exists → only show that
-    const filtered = searchSelection
-        ? [searchSelection]
-        : mapData.filter(
+    let filtered = mapData
+
+    if (searchSelection) {
+        // 🔹 Search overrides everything
+        filtered = [searchSelection]
+    } else if (parties || area || subArea) {
+        // 🔹 Filters override when search is not active
+        filtered = mapData.filter(
             (i) =>
                 (!parties || i.party === parties) &&
                 (!area || i.area === area) &&
                 (!subArea || i.subArea === subArea)
         )
+    }
+
 
     const worldBounds = [
         [-90, -180],
@@ -187,8 +192,11 @@ export default function ElectionMap({ selectedFilters, searchSelection }) {
                             <Polyline
                                 key={`st-${idx}-${i}`}
                                 positions={line}
-                                pathOptions={{ color: "#0077ff", weight: 3, opacity: 0.9 }}
-                            />
+                                pathOptions={{
+                                    color: block.streetColor || "#0077ff", // ✅ use streetColor from mapData
+                                    weight: 3,
+                                    opacity: 0.9,
+                                }} />
                         ))}
 
                         {block.pollingStations?.map((ps, i) => (

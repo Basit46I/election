@@ -5,26 +5,20 @@ import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 const parties = [
     { value: "jip", label: "Jamaat-e-Islami Pakistan (JIP)" },
     { value: "mqm", label: "Muttahida Qaumi Movement (MQM)" },
-    { value: "ppp", label: "Pakistan Peoples Party (PPP)" },
-    { value: "pti", label: "Pakistan Tehreek-e-Insaf (PTI)" },
-    { value: "pmln", label: "Pakistan Muslim League - Nawaz (PML-N)" }
 ]
 
 const area = {
-    jip: [{ value: "gulistan-e-jauhar", label: "Gulistan-e-Jauhar" }, { value: "north-karachi", label: "North Karachi" }],
-    mqm: [{ value: "gulshan-e-iqbal", label: "Gulshan-e-Iqbal" }, { value: "nazimabad", label: "Nazimabad" }],
-    ppp: [{ value: "dha-phase-1", label: "DHA Phase 1" }, { value: "lyari", label: "Lyari" }],
-    pti: [{ value: "clifton", label: "Clifton" }, { value: "korangi", label: "Korangi" }],
-    pmln: [{ value: "malir", label: "Malir" }, { value: "baldia-town", label: "Baldia Town" }]
+    jip: [{ value: "gulistan-e-jauhar", label: "Gulistan-e-Jauhar" }],
+    mqm: [{ value: "gulistan-e-jauhar", label: "Gulistan-e-Jauhar" }],
 }
 
 const subArea = {
     "gulistan-e-jauhar": [
-        { value: "block-1", label: "Block 1" }, { value: "block-2", label: "Block 2" }
+        { value: "kda-overseas-bungalows", label: "KDA OVERSEAS' BUNGALOWS" }
     ],
-    "north-karachi": [
-        { value: "sector-5", label: "Sector 5" }
-    ]
+    "gulistan-e-jauhar": [
+        { value: "kda-overseas-bungalows", label: "KDA OVERSEAS' BUNGALOWS" }
+    ],
 }
 
 export default function Sidebar({ list, setList, expanded, setExpanded, mobileOpen, setMobileOpen }) {
