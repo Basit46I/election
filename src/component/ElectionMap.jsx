@@ -12,7 +12,7 @@ import {
 import "leaflet/dist/leaflet.css"
 import L from "leaflet"
 import { useEffect, useMemo } from "react"
-import { mapData } from "../data/mapData"
+import { mapData, streetCoordinates } from "../data/mapData"
 import { FaMapMarkerAlt } from "react-icons/fa"
 import { renderToStaticMarkup } from "react-dom/server"
 
@@ -110,7 +110,7 @@ function Legend() {
     )
 }
 
-export default function ElectionMap({ selectedFilters, searchSelection }) {
+export default function ElectionMap({ selectedFilters, searchSelection, partyDetails }) {
     const { parties, area, subArea } = selectedFilters
 
     // If searchSelection exists → only show that
@@ -129,7 +129,6 @@ export default function ElectionMap({ selectedFilters, searchSelection }) {
         )
     }
 
-
     const worldBounds = [
         [-90, -180],
         [90, 180],
@@ -137,6 +136,11 @@ export default function ElectionMap({ selectedFilters, searchSelection }) {
 
     const fitMany = filtered.length > 1
     const fitOne = filtered.length === 1 ? filtered[0] : null
+
+    const coordsList = partyDetails
+        .map((party) => streetCoordinates[party.area])
+        .filter(Boolean) // remove undefined
+    console.log(partyDetails);
 
     return (
         <div style={{ position: "relative" }}>
@@ -159,25 +163,27 @@ export default function ElectionMap({ selectedFilters, searchSelection }) {
                 />
 
                 {/* Polygons */}
-                {filtered.map((block, idx) => {
-                    const style = {
-                        color: block.color,
-                        weight: searchSelection ? 4 : 2,
-                        fillOpacity: searchSelection ? 0.3 : 0.1,
-                    }
+                {partyDetails && partyDetails.map((party, index) => {
+                    const coords = streetCoordinates[party.area];
+                    console.log(streetCoordinates);
+                    if (!coords) return null;
 
                     return (
-                        <Polygon key={idx} positions={block.coordinates} pathOptions={style}>
+                        <Polygon key={index} positions={coords} pathOptions={{
+                            color: party.color || "blue",
+                            fillColor: party.color || "blue",
+                            fillOpacity: 0.4,
+                        }}>
                             <Tooltip sticky>
                                 <div style={{ fontSize: 12 }}>
                                     <div>
-                                        <strong>Party:</strong> {block.partyLabel}
+                                        <strong>Party:</strong> {party.name}
                                     </div>
                                     <div>
-                                        <strong>Area:</strong> {block.areaLabel}
+                                        <strong>Area:</strong> {party.area}
                                     </div>
                                     <div>
-                                        <strong>Sub Area:</strong> {block.subAreaLabel}
+                                        <strong>Total votes:</strong> {party.totalVotes}
                                     </div>
                                 </div>
                             </Tooltip>
@@ -185,55 +191,8 @@ export default function ElectionMap({ selectedFilters, searchSelection }) {
                     )
                 })}
 
-                {/* Streets & Polling Stations (only when showing detail) */}
-                {filtered.map((block, idx) => (
-                    <div key={`extras-${idx}`}>
-                        {block.streets?.map((line, i) => (
-                            <Polyline
-                                key={`st-${idx}-${i}`}
-                                positions={line}
-                                pathOptions={{
-                                    color: block.streetColor || "#0077ff", // ✅ use streetColor from mapData
-                                    weight: 3,
-                                    opacity: 0.9,
-                                }} />
-                        ))}
-
-                        {block.pollingStations?.map((ps, i) => (
-                            <Marker
-                                key={`ps-${idx}-${i}`}
-                                position={ps.coordinates}
-                                icon={getPartyIcon(block.party)}
-                            >
-                                <Popup>
-                                    <div style={{ fontSize: "14px" }}>
-                                        <h3
-                                            style={{
-                                                margin: 0,
-                                                fontSize: "16px",
-                                                color: partyColors[block.party],
-                                            }}
-                                        >
-                                            {ps.name}
-                                        </h3>
-                                        <div>
-                                            <strong>Party:</strong> {block.partyLabel}
-                                        </div>
-                                        <div>
-                                            <strong>Area:</strong> {block.areaLabel}
-                                        </div>
-                                        <div>
-                                            <strong>Sub Area:</strong> {block.subAreaLabel}
-                                        </div>
-                                    </div>
-                                </Popup>
-                            </Marker>
-                        ))}
-                    </div>
-                ))}
-
                 {/* Auto zoom */}
-                {fitMany && <FitToBounds items={filtered} />}
+                {fitMany && <FitToBounds items={coordsList} />}
                 {fitOne && <FitToPolygon coordinates={fitOne.coordinates} />}
             </MapContainer>
 
