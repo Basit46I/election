@@ -140,7 +140,6 @@ export default function ElectionMap({ selectedFilters, searchSelection, partyDet
     const coordsList = partyDetails
         .map((party) => streetCoordinates[party.area])
         .filter(Boolean) // remove undefined
-    console.log(partyDetails);
 
     return (
         <div style={{ position: "relative" }}>
@@ -165,7 +164,6 @@ export default function ElectionMap({ selectedFilters, searchSelection, partyDet
                 {/* Polygons */}
                 {partyDetails && partyDetails.map((party, index) => {
                     const coords = streetCoordinates[party.area];
-                    console.log(streetCoordinates);
                     if (!coords) return null;
 
                     return (
