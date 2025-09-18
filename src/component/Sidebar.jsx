@@ -29,7 +29,7 @@ const subArea = {
     ],
 }
 
-export default function Sidebar({ list, setList, expanded, setExpanded, mobileOpen, setMobileOpen, electionMeta, setElectionMeta, parties, setParties, isPopupOpen, setIsPopupOpen, handleSave, isOpen, setIsOpen }) {
+export default function Sidebar({ list, setList, expanded, setExpanded, mobileOpen, setMobileOpen, electionMeta, setElectionMeta, parties, setParties, isPopupOpen, setIsPopupOpen, handleSave, isOpen, setIsOpen, partyDetails }) {
     const [filteredArea, setFilteredArea] = useState([])
     const [filteredSubArea, setFilteredSubArea] = useState([])
     const partyRefs = useRef([]);
@@ -70,7 +70,7 @@ export default function Sidebar({ list, setList, expanded, setExpanded, mobileOp
     }
 
     useEffect(() => {
-        if (lastAddedId !== null && partyRefs.current[handleSavelastAddedId]) {
+        if (lastAddedId !== null && partyRefs.current[lastAddedId]) {
             partyRefs.current[lastAddedId].scrollIntoView({ behavior: "smooth", block: "start" });
         }
     }, [lastAddedId]);
@@ -291,10 +291,10 @@ export default function Sidebar({ list, setList, expanded, setExpanded, mobileOp
 
                     <div className="w-full max-w-[400px] h-70 bg-white mt-8">
                         <ResponsiveContainer width="100%" height="100%">
-                            {parties && parties.length === 0 ? (
+                            {partyDetails && partyDetails.length > 0 ? (
                                 <PieChart>
                                     <Pie
-                                        data={parties.map(p => ({ ...p, castedVotes: Number(p.castedVotes) }))}
+                                        data={partyDetails.map(p => ({ ...p, castedVotes: Number(p.castedVotes) }))}
                                         dataKey="castedVotes"
                                         nameKey="name"
                                         cx="50%"
@@ -303,7 +303,7 @@ export default function Sidebar({ list, setList, expanded, setExpanded, mobileOp
                                         innerRadius={30}
                                         paddingAngle={3}
                                     >
-                                        {parties.map((entry, index) => (
+                                        {partyDetails.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={entry.color || "#6366F1"} />
                                         ))}
                                     </Pie>

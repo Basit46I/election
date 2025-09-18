@@ -5,7 +5,7 @@ import MarkerClusterGroup from 'react-leaflet-markercluster';
 import { coordinates, streetCoordinates } from '../data/mapData';
 import ZoomControl from './ZoomControl';
 
-export default function Map({ partyDetails }) {
+export default function Map({ partyDetails, searchSelection }) {
 
     const createCustomClusterIcon = (cluster) => {
         return new divIcon({
@@ -21,6 +21,10 @@ export default function Map({ partyDetails }) {
         iconSize: [20, 20],
         iconAnchor: [10, 10],
     });
+
+    const displayedParties = searchSelection
+        ? partyDetails.filter(party => party.name === searchSelection.name)
+        : partyDetails;
 
     return (
         <div className="h-screen w-full transform transition-transform duration-300">
@@ -45,10 +49,9 @@ export default function Map({ partyDetails }) {
 
                 <MarkerClusterGroup chunkedLoading iconCreateFunction={createCustomClusterIcon}>
                     {streetCoordinates.map((street, index) => {
-                        console.log(partyDetails);
                         const first = street.coordinates[0];
 
-                        const matchingParties = partyDetails.filter(
+                        const matchingParties = displayedParties.filter(
                             (party) => party.area === street.name
                         );
 
