@@ -139,9 +139,9 @@ export default function Sidebar({ list, setList, expanded, setExpanded, mobileOp
                         <div className="mt-3">
                             <label className="text-[12px]">Total votes</label>
                             <div className="flex justify-between items-center flex-wrap gap-3 mt-1">
-                                <input type="text" inputMode="numeric" value={electionMeta.totalVotes} onChange={(e) => setElectionMeta({ ...electionMeta, totalVotes: e.target.value.replace(/[^0-9]/g, "") })} className="w-full lg:w-52 px-3 py-3 outline-none text-[12px] border border-gray-200 rounded" />
+                                <input type="text" inputMode="numeric" value={electionMeta.totalVotes} onChange={(e) => setElectionMeta({ ...electionMeta, totalVotes: e.target.value.replace(/[^0-9]/g, "") })} placeholder="Total votes" className="w-full lg:w-52 px-3 py-3 outline-none text-[12px] border border-gray-200 rounded" />
 
-                                <input type="text" inputMode="numeric" value={electionMeta.totalCastedVotes} onChange={(e) => setElectionMeta({ ...electionMeta, totalCastedVotes: e.target.value.replace(/[^0-9]/g, "") })} className="w-full lg:w-52 px-3 py-3 outline-none text-[12px] border border-gray-200 rounded" />
+                                <input type="text" inputMode="numeric" value={electionMeta.totalCastedVotes} onChange={(e) => setElectionMeta({ ...electionMeta, totalCastedVotes: e.target.value.replace(/[^0-9]/g, "") })} placeholder="Casted votes" className="w-full lg:w-52 px-3 py-3 outline-none text-[12px] border border-gray-200 rounded" />
                             </div>
                         </div>
                     </div>
