@@ -5,7 +5,10 @@ import MarkerClusterGroup from 'react-leaflet-markercluster';
 import { coordinates, streetCoordinates } from '../data/mapData';
 import ZoomControl from './ZoomControl';
 
-export default function Map({ partyDetails, searchSelection }) {
+export default function Map({ electionDetail, searchSelection }) {
+
+    const electionMeta = electionDetail[0];
+    const parties = electionDetail.slice(1);
 
     const createCustomClusterIcon = (cluster) => {
         return new divIcon({
@@ -23,8 +26,8 @@ export default function Map({ partyDetails, searchSelection }) {
     });
 
     const displayedParties = searchSelection
-        ? partyDetails.filter(party => party.name === searchSelection.name)
-        : partyDetails;
+        ? parties.filter(party => party.name === searchSelection.name)
+        : parties;
 
     return (
         <div className="h-screen w-full transform transition-transform duration-300">
@@ -55,13 +58,13 @@ export default function Map({ partyDetails, searchSelection }) {
                             (party) => party.area === street.name
                         );
 
-                        if (matchingParties.length > 1) {
-                            alert(`${street.name} is already there`);
-                        }
-
                         if (matchingParties.length === 0) return null;
 
-                        const lineColor = matchingParties[0].color;
+                        const winner = matchingParties.reduce((prev, curr) =>
+                            Number(curr.castedVotes) > Number(prev.castedVotes) ? curr : prev
+                        );
+
+                        const lineColor = winner.color;
 
                         const formattedStreetName = street.name.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 
@@ -74,23 +77,26 @@ export default function Map({ partyDetails, searchSelection }) {
 
                                 <Marker position={first} icon={streetEndIcon}>
                                     <Popup closeButton={true}>
-                                        <div className="">
-                                            {matchingParties.map((party) => (
-                                                <div key={party.id} className="flex flex-col gap-3 items-start">
-                                                    {/* Party name */}
-                                                    <h3 className="text-base font-bold text-gray-800">{party.name}</h3>
+                                        <div className="flex flex-col gap-3 items-start">
+                                            <h3 className="text-base font-bold text-gray-800">
+                                                {winner.name} (Winner)
+                                            </h3>
 
-                                                    {/* Street badge */}
-                                                    <span className="text-sm font-semibold">
-                                                        {formattedStreetName}
-                                                    </span>
+                                            <span className="text-sm font-semibold">
+                                                {formattedStreetName}
+                                            </span>
 
-                                                    {/* Votes */}
-                                                    <span className="text-sm font-semibold" style={{ color: party.color }}>
-                                                        {party.castedVotes} votes
-                                                    </span>
-                                                </div>
-                                            ))}
+                                            {/* Votes summary */}
+                                            <span className="text-sm font-semibold" style={{ color: winner.color }}>
+                                                {winner.castedVotes} votes
+                                            </span>
+
+                                            {/* ElectionMeta stats */}
+                                            <div className="text-xs text-gray-700 mt-2">
+                                                <p>Total Votes: {electionMeta.totalVotes}</p>
+                                                <p>Casted Votes: {electionMeta.totalCastedVotes}</p>
+                                                <p>Winner: {winner.name}</p>
+                                            </div>
                                         </div>
                                     </Popup>
                                 </Marker>

@@ -29,7 +29,7 @@ const subArea = {
     ],
 }
 
-export default function Sidebar({ list, setList, expanded, setExpanded, mobileOpen, setMobileOpen, electionMeta, setElectionMeta, parties, setParties, isPopupOpen, setIsPopupOpen, handleSave, isOpen, setIsOpen, partyDetails }) {
+export default function Sidebar({ list, setList, expanded, setExpanded, mobileOpen, setMobileOpen, electionMeta, setElectionMeta, parties, setParties, isPopupOpen, setIsPopupOpen, handleSave, isOpen, setIsOpen }) {
     const [filteredArea, setFilteredArea] = useState([])
     const [filteredSubArea, setFilteredSubArea] = useState([])
     const partyRefs = useRef([]);
@@ -77,12 +77,7 @@ export default function Sidebar({ list, setList, expanded, setExpanded, mobileOp
 
     return (
         <>
-            <div
-                className={`fixed top-0 left-0 h-full bg-white px-5 z-50 transform transition-transform duration-300 shadow-lg
-    ${expanded || mobileOpen ? "translate-x-0" : "-translate-x-full"} 
-    w-full lg:w-120
-  `}
-            >
+            <div className={`fixed top-0 left-0 h-full bg-white px-5 z-50 transform transition-transform duration-300 shadow-lg ${expanded || mobileOpen ? "translate-x-0" : "-translate-x-full"} w-full lg:w-120`} >
 
                 {/* Heading */}
                 <div className="py-4 flex justify-between items-center flex-wrap">
@@ -144,9 +139,9 @@ export default function Sidebar({ list, setList, expanded, setExpanded, mobileOp
                         <div className="mt-3">
                             <label className="text-[12px]">Total votes</label>
                             <div className="flex justify-between items-center flex-wrap gap-3 mt-1">
-                                <input type="text" inputMode="numeric" value={electionMeta.totalVotes} onChange={(e) => setElectionMeta({ ...electionMeta, totalVotes: e.target.value.replace(/[^0-9]/g, "") })} className="w-full px-3 py-3 outline-none text-[12px] border border-gray-200 rounded" />
+                                <input type="text" inputMode="numeric" value={electionMeta.totalVotes} onChange={(e) => setElectionMeta({ ...electionMeta, totalVotes: e.target.value.replace(/[^0-9]/g, "") })} className="w-full lg:w-52 px-3 py-3 outline-none text-[12px] border border-gray-200 rounded" />
 
-                                <input type="text" inputMode="numeric" value={electionMeta.totalCastedVotes} onChange={(e) => setElectionMeta({ ...electionMeta, totalCastedVotes: e.target.value.replace(/[^0-9]/g, "") })} className="w-full px-3 py-3 outline-none text-[12px] border border-gray-200 rounded" />
+                                <input type="text" inputMode="numeric" value={electionMeta.totalCastedVotes} onChange={(e) => setElectionMeta({ ...electionMeta, totalCastedVotes: e.target.value.replace(/[^0-9]/g, "") })} className="w-full lg:w-52 px-3 py-3 outline-none text-[12px] border border-gray-200 rounded" />
                             </div>
                         </div>
                     </div>
@@ -157,10 +152,10 @@ export default function Sidebar({ list, setList, expanded, setExpanded, mobileOp
                             <label className="text-[12px]">Put coordinates</label>
                             <div className="flex justify-between items-center flex-wrap gap-3 mt-1">
                                 <input type="text" inputMode="numeric" value={electionMeta.latitude} onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, "") }}
-                                    className="w-full px-3 py-3 outline-none text-[12px] border border-gray-200 rounded transition duration-300 ring-indigo-600 focus:ring-1 disabled:bg-gray-100 disabled:cursor-not-allowed" placeholder="Longitude" disabled={true} />
+                                    className="w-full lg:w-52 px-3 py-3 outline-none text-[12px] border border-gray-200 rounded transition duration-300 ring-indigo-600 focus:ring-1 disabled:bg-gray-100 disabled:cursor-not-allowed" placeholder="Longitude" disabled={true} />
 
                                 <input type="text" inputMode="numeric" value={electionMeta.longitude} onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, "") }}
-                                    className="w-full px-3 py-3 outline-none text-[12px] border border-gray-200 rounded transition duration-300 ring-indigo-600 focus:ring-1 disabled:bg-gray-100 disabled:cursor-not-allowed" placeholder="Latitude" disabled={true}
+                                    className="w-full lg:w-52 px-3 py-3 outline-none text-[12px] border border-gray-200 rounded transition duration-300 ring-indigo-600 focus:ring-1 disabled:bg-gray-100 disabled:cursor-not-allowed" placeholder="Latitude" disabled={true}
                                 />
 
                             </div>
@@ -188,7 +183,7 @@ export default function Sidebar({ list, setList, expanded, setExpanded, mobileOp
                                     const updated = [...parties];
                                     updated[index] = { ...updated[index], name: e.target.value };
                                     setParties(updated);
-                                }} className="w-full px-3 py-3 outline-none text-[12px] border border-gray-200 rounded transition duration-300 ring-indigo-600 focus:ring-1" placeholder="Party name" />
+                                }} className="w-full lg:w-52 px-3 py-3 outline-none text-[12px] border border-gray-200 rounded transition duration-300 ring-indigo-600 focus:ring-1" placeholder="Party name" />
                                 <input
                                     type="text"
                                     inputMode="numeric"
@@ -198,7 +193,7 @@ export default function Sidebar({ list, setList, expanded, setExpanded, mobileOp
                                         updated[index] = { ...updated[index], castedVotes: e.target.value.replace(/[^0-9]/g, "") };
                                         setParties(updated);
                                     }}
-                                    className="w-full px-3 py-3 outline-none text-[12px] border border-gray-200 rounded transition duration-300 ring-indigo-600 focus:ring-1"
+                                    className="w-full lg:w-52 px-3 py-3 outline-none text-[12px] border border-gray-200 rounded transition duration-300 ring-indigo-600 focus:ring-1"
                                     placeholder="Casted votes"
                                 />
                             </div>
@@ -212,7 +207,7 @@ export default function Sidebar({ list, setList, expanded, setExpanded, mobileOp
                                         updated[index] = { ...updated[index], area: e.target.value };
                                         setParties(updated);
                                     }}
-                                    className="w-full px-3 py-3 outline-none text-[12px] border border-gray-200 rounded transition duration-300 ring-indigo-600 focus:ring-1"
+                                    className="w-full lg:w-52 px-3 py-3 outline-none text-[12px] border border-gray-200 rounded transition duration-300 ring-indigo-600 focus:ring-1"
                                 >
                                     <option value="">Select Area</option>
                                     <option value="street_1">Street 01</option>
@@ -224,7 +219,7 @@ export default function Sidebar({ list, setList, expanded, setExpanded, mobileOp
                                 </select>
 
                                 {/* Color picker box */}
-                                <div className="relative w-full">
+                                <div className="relative w-full lg:w-52">
                                     <input
                                         type="color"
                                         value={item.color || "#000000"}
@@ -268,7 +263,7 @@ export default function Sidebar({ list, setList, expanded, setExpanded, mobileOp
 
                 </motion.div>
 
-                <div className="flex gap-3 justify-between items-center mt-4 border-t border-gray-200">
+                <div className="flex gap-3 justify-center items-center mt-4 border-t border-gray-200">
                     {/* Searching */}
                     {/* <div className="bg-[#f2f3f7] pl-3 flex items-center gap-3 mt-3 rounded w-full">
                         <BiSearch size={20} className="text-[#cacdd4]" />
@@ -291,10 +286,10 @@ export default function Sidebar({ list, setList, expanded, setExpanded, mobileOp
 
                     <div className="w-full max-w-[400px] h-70 bg-white mt-8">
                         <ResponsiveContainer width="100%" height="100%">
-                            {partyDetails && partyDetails.length > 0 ? (
+                            {parties && parties.length > 0 ? (
                                 <PieChart>
                                     <Pie
-                                        data={partyDetails.map(p => ({ ...p, castedVotes: Number(p.castedVotes) }))}
+                                        data={parties.map(p => ({ ...p, castedVotes: Number(p.castedVotes) }))}
                                         dataKey="castedVotes"
                                         nameKey="name"
                                         cx="50%"
@@ -303,7 +298,7 @@ export default function Sidebar({ list, setList, expanded, setExpanded, mobileOp
                                         innerRadius={30}
                                         paddingAngle={3}
                                     >
-                                        {partyDetails.map((entry, index) => (
+                                        {parties.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={entry.color || "#6366F1"} />
                                         ))}
                                     </Pie>
@@ -325,7 +320,26 @@ export default function Sidebar({ list, setList, expanded, setExpanded, mobileOp
                             )}
                         </ResponsiveContainer>
 
+                        {/* Winner info */}
+                        {parties.length > 0 && (
+                            <div className="mt-4 text-center text-sm">
+                                <p className="font-semibold text-indigo-600">
+                                    Winner:{" "}
+                                    {parties.reduce((max, p) =>
+                                        Number(p.castedVotes) > Number(max.castedVotes) ? p : max
+                                    ).name || "N/A"}
+                                </p>
+                                <p className="text-gray-500">
+                                    Votes:{" "}
+                                    {electionMeta.totalCastedVotes || 0} / {parties.reduce((max, p) =>
+                                        Number(p.castedVotes) > Number(max.castedVotes) ? p : max
+                                    ).castedVotes || 0}{" "}
+
+                                </p>
+                            </div>
+                        )}
                     </div>
+
 
 
 

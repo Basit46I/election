@@ -1,18 +1,17 @@
 import { useState, useRef, useEffect } from "react"
 import { BiMenu, BiSearch } from "react-icons/bi"
 
-export default function Header({ expanded, setExpanded, onSearchSelect, partyDetails }) {
+export default function Header({ expanded, setExpanded, onSearchSelect, electionDetail }) {
     const [searchOpen, setSearchOpen] = useState(false)
     const [query, setQuery] = useState("")
     const [results, setResults] = useState([])
-    const [loading, setLoading] = useState(false) // 👈 loader state
+    const [loading, setLoading] = useState(false)
     const searchRef = useRef(null)
 
-    // 🔍 Handle input change
     const handleSearch = (e) => {
         const value = e.target.value
         setQuery(value)
-        setLoading(true) // start loading
+        setLoading(true)
         setResults([])
 
         if (!value.trim()) {
@@ -21,20 +20,22 @@ export default function Header({ expanded, setExpanded, onSearchSelect, partyDet
             return
         }
 
-        // Simulate async search (like API call)
+        const parties = electionDetail.slice(1)
+
         setTimeout(() => {
-            const filtered = partyDetails.filter(
+            const filtered = parties.filter(
                 (item) =>
                     item.name.toLowerCase().includes(value.toLowerCase()) ||
                     item.area.toLowerCase().includes(value.toLowerCase()) ||
                     item.castedVotes.toLowerCase().includes(value.toLowerCase())
             )
             setResults(filtered)
-            setLoading(false) // stop loading
-        }, 500) // 0.5s delay
+            setLoading(false)
+        }, 500)
+
+        setSearchOpen(true)
     }
 
-    // ✅ When user selects a result
     const handleSelect = (item) => {
         setQuery("")
         setResults([])
@@ -42,7 +43,6 @@ export default function Header({ expanded, setExpanded, onSearchSelect, partyDet
         if (onSearchSelect) onSearchSelect(item)
     }
 
-    // 📌 Close dropdown on outside click
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (searchRef.current && !searchRef.current.contains(e.target)) {
@@ -76,7 +76,7 @@ export default function Header({ expanded, setExpanded, onSearchSelect, partyDet
                         type="text"
                         value={query}
                         onChange={handleSearch}
-                        onFocus={() => setSearchOpen(true)}   // 👈 open when clicked
+                        onFocus={() => setSearchOpen(true)}
                         placeholder="Search anything"
                         className="w-full text-xs outline-none text-gray-700"
                     />
@@ -102,13 +102,13 @@ export default function Header({ expanded, setExpanded, onSearchSelect, partyDet
                                     className="px-3 py-2 text-sm border-b border-gray-300 hover:bg-gray-100 cursor-pointer"
                                 >
                                     <div className="text-xs font-semibold">{item.name}</div>
-                                    <div className=" text-xs text-gray-600">
+                                    <div className="text-xs text-gray-600">
                                         {item.area.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())} → {item.castedVotes}
                                     </div>
                                 </div>
                             ))
                         ) : (
-                            <div className="px-3 py-2 text-sm text-xs text-center text-gray-500">
+                            <div className="px-3 py-2 text-xs text-center text-gray-500">
                                 No data found
                             </div>
                         )}

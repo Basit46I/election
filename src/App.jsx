@@ -20,10 +20,10 @@ function App() {
     { id: crypto.randomUUID(), name: "", castedVotes: "", area: "", color: "" }
   ]);
 
-  const [partyDetails, setPartyDetails] = useState([]);
+  const [electionDetail, setElectionDetail] = useState([]);
 
   const handleSave = () => {
-    setPartyDetails([...parties]);
+    setElectionDetail([electionMeta, ...parties]);
     setIsOpen(false)
   }
 
@@ -43,15 +43,14 @@ function App() {
           setParties={setParties}
           isPopupOpen={isPopupOpen}
           setIsPopupOpen={setIsPopupOpen}
-          partyDetails={partyDetails}
           isOpen={isOpen}
           setIsOpen={setIsOpen}
           handleSave={handleSave}
         />
         <div className={`flex-1 ${expanded ? "ml-0 lg:ml-120" : "ml-0"}`}>
-          <Header expanded={expanded} setExpanded={setExpanded} onSearchSelect={setSearchSelection} partyDetails={partyDetails} />
+          <Header expanded={expanded} setExpanded={setExpanded} onSearchSelect={setSearchSelection} electionDetail={electionDetail} />
           {/* <ElectionMap selectedFilters={filters} searchSelection={searchSelection} electionDetails={electionDetails} /> */}
-          <Map partyDetails={partyDetails} searchSelection={searchSelection} />
+          <Map electionDetail={electionDetail} searchSelection={searchSelection} />
         </div>
       </div>
     </div>
