@@ -14,21 +14,23 @@ function App() {
   const [isOpen, setIsOpen] = useState(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false)
 
-  const [electionMeta, setElectionMeta] = useState({ totalVotes: "", totalCastedVotes: "", latitude: "24.911775136948908", longitude: "67.11721981107088", });
+  const [mapCoords, setMapCoords] = useState({ latitude: "24.911775136948908", longitude: "67.11721981107088", });
 
-  const [parties, setParties] = useState([
-    { id: crypto.randomUUID(), name: "", castedVotes: "", area: "", color: "" }
-  ]);
+  const [areas, setAreas] = useState([{
+    id: crypto.randomUUID(), area: "", totalVotes: "", totalCastedVotes: "", parties: [{ id: crypto.randomUUID(), name: "", castedVotes: "", color: "" }]
+  }]);
+
+  console.log(areas)
 
   const [electionDetail, setElectionDetail] = useState([]);
 
   const handleSave = () => {
-    setElectionDetail([electionMeta, ...parties]);
+    setElectionDetail(areas);
     setIsOpen(false)
   }
 
   return (
-    <div className="font-poppins">
+    <div className="font-poppins" >
       <div className="flex">
         <Sidebar
           expanded={expanded}
@@ -37,10 +39,10 @@ function App() {
           setList={setFilters}
           mobileOpen={mobileOpen}
           setMobileOpen={setMobileOpen}
-          electionMeta={electionMeta}
-          setElectionMeta={setElectionMeta}
-          parties={parties}
-          setParties={setParties}
+          mapCoords={mapCoords}
+          setMapCoords={setMapCoords}
+          areas={areas}
+          setAreas={setAreas}
           isPopupOpen={isPopupOpen}
           setIsPopupOpen={setIsPopupOpen}
           isOpen={isOpen}
@@ -53,7 +55,7 @@ function App() {
           <Map electionDetail={electionDetail} searchSelection={searchSelection} />
         </div>
       </div>
-    </div>
+    </div >
   )
 }
 

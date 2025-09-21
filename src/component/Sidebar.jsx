@@ -29,25 +29,52 @@ const subArea = {
     ],
 }
 
-export default function Sidebar({ list, setList, expanded, setExpanded, mobileOpen, setMobileOpen, electionMeta, setElectionMeta, parties, setParties, isPopupOpen, setIsPopupOpen, handleSave, isOpen, setIsOpen }) {
+export default function Sidebar({ list, setList, expanded, setExpanded, mobileOpen, setMobileOpen, mapCoords, setMapCoords, areas, setAreas, isPopupOpen, setIsPopupOpen, handleSave, isOpen, setIsOpen }) {
     const [filteredArea, setFilteredArea] = useState([])
     const [filteredSubArea, setFilteredSubArea] = useState([])
     const partyRefs = useRef([]);
     const [lastAddedId, setLastAddedId] = useState(null);
+    const allParties = (areas || []).flatMap(area => (area.parties || []).map(p => ({ ...p, area: area.area })));
 
-    const addPartyDetails = () => {
-        const newId = crypto.randomUUID();
-
-        setParties((prev) => [
+    const addArea = () => {
+        setAreas(prev => [
             ...prev,
-            { id: newId, name: "", castedVotes: "", area: "", color: "" }
+            {
+                id: crypto.randomUUID(),
+                area: "",
+                totalVotes: "",
+                totalCastedVotes: "",
+                parties: [{ id: crypto.randomUUID(), name: "", castedVotes: "", color: "" }]
+            }
         ]);
-
-        setLastAddedId(newId)
     };
 
-    const removeParty = (indexToRemove) => {
-        setParties((prev) => prev.filter((_, i) => i !== indexToRemove));
+    const removeArea = (areaIndex) => {
+        setAreas(prev => prev.filter((_, i) => i !== areaIndex));
+    };
+
+    const addPartyToArea = (areaIndex) => {
+        const newId = crypto.randomUUID();
+        setAreas(prev => {
+            const copy = [...prev];
+            const exists = copy[areaIndex].parties.some(p => p.id === newId);
+            if (!exists) {
+                copy[areaIndex].parties = [
+                    ...copy[areaIndex].parties,
+                    { id: newId, name: "", castedVotes: "", color: "" }
+                ];
+            }
+            return copy;
+        });
+        setLastAddedId(newId);
+    };
+
+    const removePartyFromArea = (areaIndex, partyIndex) => {
+        setAreas(prev => {
+            const copy = [...prev];
+            copy[areaIndex].parties = copy[areaIndex].parties.filter((_, i) => i !== partyIndex);
+            return copy;
+        });
     };
 
     const partyOnChange = (e) => {
@@ -76,9 +103,9 @@ export default function Sidebar({ list, setList, expanded, setExpanded, mobileOp
     }, [lastAddedId]);
 
     return (
-        <>
-            <div className={`fixed top-0 left-0 h-full bg-white px-5 z-50 transform transition-transform duration-300 shadow-lg overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-white [&::-webkit-scrollbar-thumb]:bg-indigo-100 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-button]:hidden [scrollbar-width:thin] [scrollbar-color:#c7d2fe_#ffffff] ${expanded || mobileOpen ? "translate-x-0" : "-translate-x-full"} w-full lg:w-120`} >
+        <div className={`fixed top-0 left-0 h-full bg-white px-5 z-50 transform transition-transform duration-300 shadow-lg ${expanded || mobileOpen ? "translate-x-0" : "-translate-x-full"} w-full lg:w-120 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-white [&::-webkit-scrollbar-thumb]:bg-indigo-100 [&::-webkit-scrollbar-thumb]:rounded-full`} >
 
+            <div>
                 {/* Heading */}
                 <div className="py-4 flex justify-between items-center flex-wrap">
                     <h3 className="text-indigo-600 font-semibold text-xl">Electra</h3>
@@ -99,7 +126,7 @@ export default function Sidebar({ list, setList, expanded, setExpanded, mobileOp
                     initial={{ x: "-100%" }}
                     animate={{ x: isOpen ? "0%" : "-100%" }}
                     transition={{ type: "tween", duration: 0.4 }}
-                    className="fixed top-0 left-0 h-full w-full lg:w-120 bg-white shadow-lg z-50 px-5 overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-white [&::-webkit-scrollbar-thumb]:bg-indigo-100 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-button]:hidden [scrollbar-width:thin] [scrollbar-color:#c7d2fe_#ffffff]"
+                    className="absolute top-0 left-0 h-[100vh] w-full lg:w-120 bg-white shadow-lg z-50 px-5 overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-white [&::-webkit-scrollbar-thumb]:bg-indigo-100 [&::-webkit-scrollbar-thumb]:rounded-full"
 
                 >
                     <div className="flex justify-between items-center pt-4 pb-1">
@@ -134,27 +161,17 @@ export default function Sidebar({ list, setList, expanded, setExpanded, mobileOp
 
                     </div>
 
-                    {/* Vote */}
-                    <div className="mt-3 border-t border-gray-200">
-                        <div className="mt-3">
-                            <label className="text-[12px]">Total votes</label>
-                            <div className="flex justify-between items-center flex-wrap gap-3 mt-1">
-                                <input type="text" inputMode="numeric" value={electionMeta.totalVotes} onChange={(e) => setElectionMeta({ ...electionMeta, totalVotes: e.target.value.replace(/[^0-9]/g, "") })} placeholder="Total votes" className="w-full lg:w-52 px-3 py-3 outline-none text-[12px] border border-gray-200 rounded" />
-
-                                <input type="text" inputMode="numeric" value={electionMeta.totalCastedVotes} onChange={(e) => setElectionMeta({ ...electionMeta, totalCastedVotes: e.target.value.replace(/[^0-9]/g, "") })} placeholder="Casted votes" className="w-full lg:w-52 px-3 py-3 outline-none text-[12px] border border-gray-200 rounded" />
-                            </div>
-                        </div>
-                    </div>
-
                     {/* Put coordinates */}
-                    <div className="mt-3">
+                    <div className="mt-3 border-t border-gray-200">
                         <div className="mt-3">
                             <label className="text-[12px]">Put coordinates</label>
                             <div className="flex justify-between items-center flex-wrap gap-3 mt-1">
-                                <input type="text" inputMode="numeric" value={electionMeta.latitude} onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, "") }}
+                                <input type="text" inputMode="numeric" value={mapCoords.latitude}
+                                    onChange={(e) => setMapCoords({ ...mapCoords, latitude: e.target.value })}
                                     className="w-full lg:w-52 px-3 py-3 outline-none text-[12px] border border-gray-200 rounded transition duration-300 ring-indigo-600 focus:ring-1 disabled:bg-gray-100 disabled:cursor-not-allowed" placeholder="Longitude" disabled={true} />
 
-                                <input type="text" inputMode="numeric" value={electionMeta.longitude} onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, "") }}
+                                <input type="text" inputMode="numeric" value={mapCoords.longitude}
+                                    onChange={(e) => setMapCoords({ ...mapCoords, longitude: e.target.value })}
                                     className="w-full lg:w-52 px-3 py-3 outline-none text-[12px] border border-gray-200 rounded transition duration-300 ring-indigo-600 focus:ring-1 disabled:bg-gray-100 disabled:cursor-not-allowed" placeholder="Latitude" disabled={true}
                                 />
 
@@ -162,50 +179,53 @@ export default function Sidebar({ list, setList, expanded, setExpanded, mobileOp
                         </div>
                     </div>
 
-                    {/* Party wise votes */}
-                    {parties.map((item, index) => (
-                        <div key={item.id} ref={(el) => (partyRefs.current[item.id] = el)} className="my-3">
-                            <div className="flex justify-between items-center py-4">
-                                <h3 className="font-semibold text-indigo-600 text-xl mb-2">Party {index + 1}</h3>
-                                <div className="flex gap-3">
-                                    <GoPlus
-                                        size={28}
-                                        onClick={index === parties.length - 1 ? addPartyDetails : () => removeParty(index)}
-                                        className={`font-semibold text-gray-600 ${index === parties.length - 1 ? "rotate-0 hover:text-green-600" : "rotate-45 hover:text-red-600"} transition duration-300`}
-                                    />
+                    {/* Add area and their parties */}
+                    {areas.map((area, areaIndex) => (
+                        <div key={area.id} className="mt-4 border-t border-gray-200 pt-4">
+                            <div className="flex justify-between items-center">
+                                <h3 className="font-semibold text-indigo-600 text-xl mb-2">Area {areaIndex + 1}</h3>
+                                <div className="flex items-center gap-2">
+                                    {(areaIndex === 0 || areaIndex === areas.length - 1) ? (
+                                        <>
+                                            {areaIndex !== 0 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeArea(areaIndex)}
+                                                    className="flex items-center gap-2 bg-red-600 active:shadow-sm hover:bg-red-300 transition duration-100 text-white text-[12px] px-3 py-2 rounded"
+                                                >
+                                                    Remove Area
+                                                </button>
+                                            )}
+                                            <button
+                                                type="button"
+                                                onClick={addArea}
+                                                className="flex items-center gap-2 bg-green-600 active:shadow-sm hover:bg-green-300 transition duration-100 text-white text-[12px] px-3 py-2 rounded"
+                                            >
+                                                + Add Area
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            onClick={() => removeArea(areaIndex)}
+                                            className="flex items-center gap-2 bg-red-600 active:shadow-sm hover:bg-red-300 transition duration-100 text-white text-[12px] px-3 py-2 rounded"
+                                        >
+                                            Remove Area
+                                        </button>
+                                    )}
                                 </div>
 
                             </div>
 
-                            <label className="text-[12px]">Name</label>
-                            <div className="flex justify-between items-center flex-wrap gap-3 mt-1">
-                                <input type="text" value={item.name} onChange={(e) => {
-                                    const updated = [...parties];
-                                    updated[index] = { ...updated[index], name: e.target.value };
-                                    setParties(updated);
-                                }} className="w-full lg:w-52 px-3 py-3 outline-none text-[12px] border border-gray-200 rounded transition duration-300 ring-indigo-600 focus:ring-1" placeholder="Party name" />
-                                <input
-                                    type="text"
-                                    inputMode="numeric"
-                                    value={item.castedVotes}
-                                    onChange={(e) => {
-                                        const updated = [...parties];
-                                        updated[index] = { ...updated[index], castedVotes: e.target.value.replace(/[^0-9]/g, "") };
-                                        setParties(updated);
-                                    }}
-                                    className="w-full lg:w-52 px-3 py-3 outline-none text-[12px] border border-gray-200 rounded transition duration-300 ring-indigo-600 focus:ring-1"
-                                    placeholder="Casted votes"
-                                />
-                            </div>
-
-
-                            <div className="flex justify-between items-center flex-wrap gap-3 mt-3">
+                            {/* Area select */}
+                            <label className="text-[12px]">Area</label>
+                            <div className="flex justify-between flex-wrap gap-3 mt-1 mb-3">
                                 <select
-                                    value={item.area}
+                                    value={area.area}
                                     onChange={(e) => {
-                                        const updated = [...parties];
-                                        updated[index] = { ...updated[index], area: e.target.value };
-                                        setParties(updated);
+                                        const updated = [...areas];
+                                        updated[areaIndex] = { ...updated[areaIndex], area: e.target.value };
+                                        setAreas(updated);
                                     }}
                                     className="w-full lg:w-52 px-3 py-3 outline-none text-[12px] border border-gray-200 rounded transition duration-300 ring-indigo-600 focus:ring-1"
                                 >
@@ -218,40 +238,119 @@ export default function Sidebar({ list, setList, expanded, setExpanded, mobileOp
                                     <option value="street_6">Street 06</option>
                                 </select>
 
-                                {/* Color picker box */}
-                                <div className="relative w-full lg:w-52">
-                                    <input
-                                        type="color"
-                                        value={item.color || "#000000"}
-                                        onChange={(e) => {
-                                            const updated = [...parties];
-                                            updated[index] = { ...updated[index], color: e.target.value };
-                                            setParties(updated);
-                                        }}
-                                        className="absolute inset-0 w-full h-full opacity-0"
-                                    />
+                                <input
+                                    type="text"
+                                    value={area.totalVotes}
+                                    onChange={(e) => {
+                                        const updated = [...areas];
+                                        updated[areaIndex].totalVotes = e.target.value.replace(/[^0-9]/g, "");
+                                        setAreas(updated);
+                                    }}
+                                    placeholder="Total votes"
+                                    className="w-full lg:w-52 px-3 py-3 outline-none text-[12px] border border-gray-200 rounded transition duration-300"
+                                />
+                                <input
+                                    type="text"
+                                    value={area.totalCastedVotes}
+                                    onChange={(e) => {
+                                        const updated = [...areas];
+                                        updated[areaIndex].totalCastedVotes = e.target.value.replace(/[^0-9]/g, "");
+                                        setAreas(updated);
+                                    }}
+                                    placeholder="Casted votes"
+                                    className="w-full lg:w-52 px-3 py-3 outline-none text-[12px] border border-gray-200 rounded transition duration-300"
+                                />
 
-                                    <div className="flex items-center justify-between px-3 py-3 border border-gray-200 rounded bg-white">
-                                        <div
-                                            className="w-5 h-5 rounded"
-                                            style={{ backgroundColor: item.color || "#000000" }}
-                                        ></div>
+                            </div>
 
-                                        <span className="ml-2 text-gray-700 text-sm">
-                                            {item.color || "#000000"}
-                                        </span>
+                            {/* Parties for this area */}
+                            {area.parties.map((party, partyIndex) => (
+                                <div key={party.id} ref={(el) => (partyRefs.current[party.id] = el)} className="my-3">
+                                    <div className="flex justify-between items-center py-4">
+                                        <h4 className="font-semibold text-indigo-600 text-lg mb-2">Party {partyIndex + 1}</h4>
+                                        <div className="flex gap-3">
+                                            {area.parties.length === 1 ? (
+                                                <GoPlus
+                                                    size={22}
+                                                    onClick={() => addPartyToArea(areaIndex)}
+                                                    className="cursor-pointer font-semibold text-gray-600 hover:text-green-600 transition duration-300"
+                                                />
+                                            ) : (
+                                                <div className="flex gap-3">
+                                                    <GoPlus
+                                                        size={22}
+                                                        onClick={() => removePartyFromArea(areaIndex, partyIndex)}
+                                                        className="cursor-pointer font-semibold text-gray-600 rotate-45 hover:text-red-600 transition duration-300"
+                                                    />
+                                                    {partyIndex === area.parties.length - 1 && (
+                                                        <GoPlus
+                                                            size={22}
+                                                            onClick={() => addPartyToArea(areaIndex)}
+                                                            className="cursor-pointer font-semibold text-gray-600 hover:text-green-600 transition duration-300"
+                                                        />
+                                                    )}
+                                                </div>
+                                            )}
 
-                                        <svg
-                                            className="w-4 h-4 ml-auto text-gray-500"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                        </svg>
+                                        </div>
+                                    </div>
+
+                                    <label className="text-[12px]">Name</label>
+                                    <div className="flex justify-between items-center flex-wrap gap-3 mt-1">
+                                        <input
+                                            type="text"
+                                            value={party.name}
+                                            onChange={(e) => {
+                                                const updated = [...areas];
+                                                updated[areaIndex].parties[partyIndex] = { ...updated[areaIndex].parties[partyIndex], name: e.target.value };
+                                                setAreas(updated);
+                                            }}
+                                            className="w-full lg:w-52 px-3 py-3 outline-none text-[12px] border border-gray-200 rounded transition duration-300 ring-indigo-600 focus:ring-1"
+                                            placeholder="Party name"
+                                        />
+                                        <input
+                                            type="text"
+                                            inputMode="numeric"
+                                            value={party.castedVotes}
+                                            onChange={(e) => {
+                                                const updated = [...areas];
+                                                updated[areaIndex].parties[partyIndex] = { ...updated[areaIndex].parties[partyIndex], castedVotes: e.target.value.replace(/[^0-9]/g, "") };
+                                                setAreas(updated);
+                                            }}
+                                            className="w-full lg:w-52 px-3 py-3 outline-none text-[12px] border border-gray-200 rounded transition duration-300 ring-indigo-600 focus:ring-1"
+                                            placeholder="Casted votes"
+                                        />
+                                    </div>
+
+                                    <div className="flex justify-between items-center flex-wrap gap-3 mt-3">
+                                        <div className="relative w-full lg:w-52">
+                                            <input
+                                                type="color"
+                                                value={party.color || "#000000"}
+                                                onChange={(e) => {
+                                                    const updated = [...areas];
+                                                    updated[areaIndex].parties[partyIndex] = { ...updated[areaIndex].parties[partyIndex], color: e.target.value };
+                                                    setAreas(updated);
+                                                }}
+                                                className="absolute inset-0 w-full h-full opacity-0"
+                                            />
+
+                                            <div className="flex items-center justify-between px-3 py-3 border border-gray-200 rounded bg-white">
+                                                <div className="w-5 h-5 rounded" style={{ backgroundColor: party.color || "#000000" }}></div>
+
+                                                <span className="ml-2 text-gray-700 text-sm">
+                                                    {party.color || "#000000"}
+                                                </span>
+
+                                                <svg className="w-4 h-4 ml-auto text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                </svg>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            ))}
+
                         </div>
                     ))}
 
@@ -264,42 +363,26 @@ export default function Sidebar({ list, setList, expanded, setExpanded, mobileOp
                 </motion.div>
 
                 <div className="flex gap-3 justify-center items-center mt-4 border-t border-gray-200">
-                    {/* Searching */}
-                    {/* <div className="bg-[#f2f3f7] pl-3 flex items-center gap-3 mt-3 rounded w-full">
-                        <BiSearch size={20} className="text-[#cacdd4]" />
-                        <input
-                            type="text"
-                            // value={query}
-                            // onChange={handleSearch}
-                            // onFocus={() => setSearchOpen(true)}   // 👈 open when clicked
-                            placeholder="Search party, area, or subarea..."
-                            className="w-full text-[13px] py-3 outline-none text-gray-700 placeholder-[#cacdd4]"
-                        /> */}
-                    {/* {loading ? (
-                        // <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
-                    ) : (
-                        )} */}
-                    {/* </div> */}
-
-                    {/* Filter button */}
-                    {/* <button className="flex items-center gap-4 mt-3 active:shadow-sm bg-white border border-gray-200 transition duration-100 text-black text-[13px] px-3 py-3 rounded"> <LuSettings2 size={17} className="text-indigo-600" /> Filters</button> */}
 
                     {/* Multiple pie chart according to street */}
                     <div className="w-full mt-8">
-                        {parties.length === 0 ? (
+                        {allParties.length === 0 ? (
                             <div className="flex justify-center items-center h-40 text-gray-500 text-sm">
                                 Click add vote to fill out the fields
                             </div>
                         ) : (
-                            [...new Set(parties.map((p) => p.area))]
-                                .filter((street) => street)
+                            [...new Set(allParties.map((p) => p.area).filter(Boolean))]
                                 .map((street) => {
-                                    const streetParties = parties.filter((p) => p.area === street);
+                                    const streetParties = allParties.filter((p) => p.area === street);
+
+                                    const winner = streetParties.length ? streetParties.reduce((max, p) =>
+                                        Number(p.castedVotes) > Number(max.castedVotes) ? p : max
+                                    ) : null;
 
                                     return (
                                         <div key={street} className="mb-10">
                                             <h3 className="text-center font-semibold text-indigo-600 mb-3 capitalize">
-                                                {street.replace(/_/g, " ")}
+                                                {street ? street.replace(/_/g, " ") : "Unknown"}
                                             </h3>
 
                                             <div className="w-full max-w-[400px] h-70 mx-auto bg-white">
@@ -308,7 +391,7 @@ export default function Sidebar({ list, setList, expanded, setExpanded, mobileOp
                                                         <Pie
                                                             data={streetParties.map((p) => ({
                                                                 ...p,
-                                                                castedVotes: Number(p.castedVotes),
+                                                                castedVotes: Number(p.castedVotes) || 0,
                                                             }))}
                                                             dataKey="castedVotes"
                                                             nameKey="name"
@@ -319,26 +402,11 @@ export default function Sidebar({ list, setList, expanded, setExpanded, mobileOp
                                                             paddingAngle={3}
                                                         >
                                                             {streetParties.map((entry, index) => (
-                                                                <Cell
-                                                                    key={`cell-${index}`}
-                                                                    fill={entry.color || "#6366F1"}
-                                                                />
+                                                                <Cell key={`cell-${index}`} fill={entry.color || "#6366F1"} />
                                                             ))}
                                                         </Pie>
-                                                        <Tooltip
-                                                            formatter={(value) => [value, "Votes"]}
-                                                            contentStyle={{
-                                                                backgroundColor: "#f9fafb",
-                                                                borderRadius: "8px",
-                                                                border: "1px solid #e5e7eb",
-                                                            }}
-                                                        />
-                                                        <Legend
-                                                            verticalAlign="bottom"
-                                                            height={36}
-                                                            iconType="circle"
-                                                            wrapperStyle={{ fontSize: "12px" }}
-                                                        />
+                                                        <Tooltip formatter={(value) => [value, "Votes"]} contentStyle={{ backgroundColor: "#f9fafb", borderRadius: "8px", border: "1px solid #e5e7eb" }} />
+                                                        <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: "12px" }} />
                                                     </PieChart>
                                                 </ResponsiveContainer>
                                             </div>
@@ -347,19 +415,14 @@ export default function Sidebar({ list, setList, expanded, setExpanded, mobileOp
                                             <div className="mt-3 text-center text-sm">
                                                 <p className="font-semibold text-indigo-600">
                                                     Winner:{" "}
-                                                    {streetParties.reduce((max, p) =>
-                                                        Number(p.castedVotes) > Number(max.castedVotes) ? p : max
-                                                    ).name || "N/A"}
+                                                    {winner ? winner.name : "N/A"}
                                                 </p>
                                                 <p className="text-gray-500">
                                                     Votes:{" "}
-                                                    {streetParties.reduce((max, p) =>
-                                                        Number(p.castedVotes) > Number(max.castedVotes) ? p : max
-                                                    ).castedVotes || 0}
+                                                    {winner ? winner.castedVotes : 0}
                                                     {" "} /{" "}
-                                                    {streetParties.reduce((sum, p) => sum + Number(p.castedVotes), 0)}
+                                                    {streetParties.reduce((sum, p) => sum + Number(p.castedVotes || 0), 0)}
                                                 </p>
-
                                             </div>
                                         </div>
                                     );
@@ -368,163 +431,7 @@ export default function Sidebar({ list, setList, expanded, setExpanded, mobileOp
                     </div>
 
                 </div>
-
             </div>
-
-            <>
-                {/* DESKTOP SIDEBAR */}
-                {/* <div
-                className={`fixed top-0 left-0 h-full w-90 bg-[#242831] z-50
-    transform transition-transform duration-300 hidden lg:block
-    ${expanded ? "translate-x-0" : "-translate-x-full"}`}
-            > */}
-                {/* <div className="p-4 flex justify-between items-center border-b border-gray-700">
-                    <h3 className="text-white font-semibold text-2xl">Geo Election</h3>
-                </div> */}
-
-                {/* <div className="p-4 space-y-6 overflow-y-auto"> */}
-                {/* Party */}
-                {/* <div>
-                        <h3 className="text-white text-sm mb-2">Filter by Party</h3>
-                        <select
-                            className="w-full bg-white text-sm outline-none px-3 py-2.5"
-                            value={list.parties}
-                            onChange={partyOnChange}
-                        >
-                            <option value="">All Parties</option>
-                            {parties.map((item, i) => (
-                                <option key={i} value={item.value}>{item.label}</option>
-                            ))}
-                        </select>
-                    </div> */}
-
-                {/* Area */}
-                {/* <div>
-                        <h3 className="text-white text-sm mb-2">Filter by Area</h3>
-                        <select
-                            className="w-full bg-white text-sm outline-none px-3 py-2.5"
-                            value={list.area}
-                            onChange={areaOnChange}
-                            disabled={!list.parties}
-                        >
-                            <option value="">Select party first</option>
-                            {filteredArea.map((item, i) => (
-                                <option key={i} value={item.value}>{item.label}</option>
-                            ))}
-                        </select>
-                    </div> */}
-
-                {/* Sub Area */}
-                {/* <div>
-                        <h3 className="text-white text-sm mb-2">Filter by Sub Area</h3>
-                        <select
-                            className="w-full bg-white text-sm outline-none px-3 py-2.5"
-                            value={list.subArea}
-                            onChange={subAreaOnChange}
-                            disabled={!list.area}
-                        >
-                            <option value="">Select area first</option>
-                            {filteredSubArea.map((item, i) => (
-                                <option key={i} value={item.value}>{item.label}</option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
-            </div> */}
-
-                {/* MOBILE SIDEBAR */}
-                {/* <div
-                className={`fixed top-0 left-0 h-full w-90 bg-[#242831] shadow-2xl z-50 transform transition-transform duration-300 lg:hidden
-                ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
-            > */}
-                {/* <div className="p-4 flex justify-between items-center border-b border-gray-700">
-                    <h3 className="text-white font-semibold text-2xl">Geo Election</h3>
-                    <button onClick={() => setMobileOpen(false)} className="text-white text-xl">✕</button>
-                </div> */}
-
-                {/* <div className="p-4 space-y-6 overflow-y-auto"> */}
-                {/* Party */}
-                {/* <div>
-                        <h3 className="text-white text-sm mb-2">Filter by Party</h3>
-                        <select
-                            className="w-full bg-white text-sm outline-none px-3 py-2.5"
-                            value={list.parties}
-                            onChange={partyOnChange}
-                        >
-                            <option value="">All Parties</option>
-                            {parties.map((item, i) => (
-                                <option key={i} value={item.value}>{item.label}</option>
-                            ))}
-                        </select>
-                    </div> */}
-
-                {/* Area */}
-                {/* <div>
-                        <h3 className="text-white text-sm mb-2">Filter by Area</h3>
-                        <select
-                            className="w-full bg-white text-sm outline-none px-3 py-2.5"
-                            value={list.area}
-                            onChange={areaOnChange}
-                            disabled={!list.parties}
-                        >
-                            <option value="">Select party first</option>
-                            {filteredArea.map((item, i) => (
-                                <option key={i} value={item.value}>{item.label}</option>
-                            ))}
-                        </select>
-                    </div> */}
-
-                {/* Sub Area */}
-                {/* <div>
-                        <h3 className="text-white text-sm mb-2">Filter by Sub Area</h3>
-                        <select
-                            className="w-full bg-white text-sm outline-none px-3 py-2.5"
-                            value={list.subArea}
-                            onChange={subAreaOnChange}
-                            disabled={!list.area}
-                        >
-                            <option value="">Select area first</option>
-                            {filteredSubArea.map((item, i) => (
-                                <option key={i} value={item.value}>{item.label}</option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
-            </div> */}
-
-                {/* MOBILE BOTTOM BAR */}
-                {/* <div className="fixed bottom-0 w-full lg:hidden z-40">
-                <div className="w-full bg-[#242831] shadow-lg flex">
-                    <div className="flex-1 border-r border-white">
-                        <button
-                            type='button'
-                            className="w-full text-white text-[13px] flex items-center justify-center gap-2 py-2 hover:text-black hover:bg-white transition duration-100"
-                            onClick={() => setMobileOpen(true)}
-                        >
-                            <FiFilter size={14} /> Party
-                        </button>
-                    </div>
-                    <div className="flex-1 border-r border-white">
-                        <button
-                            type='button'
-                            className="w-full text-white text-[13px] flex items-center justify-center gap-2 py-2 hover:text-black hover:bg-white transition duration-100"
-                            onClick={() => setMobileOpen(true)}
-                        >
-                            <FiFilter size={14} /> Area
-                        </button>
-                    </div>
-                    <div className="flex-1">
-                        <button
-                            type='button'
-                            className="w-full text-white text-[13px] flex items-center justify-center gap-2 py-2 hover:text-black hover:bg-white transition duration-100"
-                            onClick={() => setMobileOpen(true)}
-                        >
-                            <FiFilter size={14} /> Sub Area
-                        </button>
-                    </div>
-                </div>
-            </div> */}
-            </>
-        </>
+        </div>
     )
 }

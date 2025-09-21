@@ -7,8 +7,9 @@ import ZoomControl from './ZoomControl';
 
 export default function Map({ electionDetail, searchSelection }) {
 
-    const electionMeta = electionDetail[0];
-    const parties = electionDetail.slice(1);
+    const areas = electionDetail || [];
+
+    const allParties = areas.flatMap(area => (area.parties || []).map(p => ({ ...p, area: area.area })));
 
     const createCustomClusterIcon = (cluster) => {
         return new divIcon({
@@ -26,8 +27,11 @@ export default function Map({ electionDetail, searchSelection }) {
     });
 
     const displayedParties = searchSelection
-        ? parties.filter(party => party.name === searchSelection.name)
-        : parties;
+        ? allParties.filter(party =>
+            (searchSelection.name && party.name === searchSelection.name) &&
+            (!searchSelection.area || party.area === searchSelection.area)
+        )
+        : allParties;
 
     return (
         <div className="h-screen w-full transform transition-transform duration-300">
@@ -51,29 +55,26 @@ export default function Map({ electionDetail, searchSelection }) {
                 }
 
                 <MarkerClusterGroup chunkedLoading iconCreateFunction={createCustomClusterIcon}>
-                    {streetCoordinates.map((street, index) => {
+                    {areas.map((area, index) => {
+                        if (!area.area) return null;
+
+                        const street = streetCoordinates.find(s => s.name === area.area);
+                        if (!street) return null;
+
                         const first = street.coordinates[0];
-
-                        const matchingParties = displayedParties.filter(
-                            (party) => party.area === street.name
-                        );
-
+                        const matchingParties = (displayedParties || []).filter(p => p.area === area.area);
                         if (matchingParties.length === 0) return null;
 
                         const winner = matchingParties.reduce((prev, curr) =>
                             Number(curr.castedVotes) > Number(prev.castedVotes) ? curr : prev
                         );
 
-                        const lineColor = winner.color;
-
-                        const formattedStreetName = street.name.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+                        const lineColor = winner.color || "#4f39f6";
+                        const formattedStreetName = area.area.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 
                         return (
                             <div key={index}>
-                                <Polyline positions={street.coordinates} pathOptions={{
-                                    color: lineColor,
-                                    weight: 3,
-                                }} />
+                                <Polyline positions={street.coordinates} pathOptions={{ color: lineColor, weight: 3 }} />
 
                                 <Marker position={first} icon={streetEndIcon}>
                                     <Popup closeButton={true}>
@@ -81,28 +82,20 @@ export default function Map({ electionDetail, searchSelection }) {
                                             <h3 className="text-base font-bold text-gray-800">
                                                 {winner.name} (Winner)
                                             </h3>
-
-                                            <span className="text-sm font-semibold">
-                                                {formattedStreetName}
-                                            </span>
-
-                                            {/* Votes summary */}
+                                            <span className="text-sm font-semibold">{formattedStreetName}</span>
                                             <span className="text-sm font-semibold" style={{ color: winner.color }}>
                                                 {winner.castedVotes} votes
                                             </span>
-
-                                            {/* ElectionMeta stats */}
                                             <div className="text-xs text-gray-700 mt-2">
-                                                <p>Total Votes: {electionMeta.totalVotes}</p>
-                                                <p>Casted Votes: {electionMeta.totalCastedVotes}</p>
+                                                <p>Total Votes: {area.totalVotes || "—"}</p>
+                                                <p>Casted Votes: {area.totalCastedVotes || "—"}</p>
                                                 <p>Winner: {winner.name}</p>
                                             </div>
                                         </div>
                                     </Popup>
                                 </Marker>
-
                             </div>
-                        )
+                        );
                     })}
                 </MarkerClusterGroup>
 

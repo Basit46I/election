@@ -20,7 +20,9 @@ export default function Header({ expanded, setExpanded, onSearchSelect, election
             return
         }
 
-        const parties = electionDetail.slice(1)
+        const parties = (electionDetail || []).flatMap((area) =>
+            (area.parties || []).map((p) => ({ ...p, area: area.area, totalVotes: area.totalVotes }))
+        );
 
         setTimeout(() => {
             const filtered = parties.filter(
