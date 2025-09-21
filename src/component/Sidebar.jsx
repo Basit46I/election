@@ -77,7 +77,7 @@ export default function Sidebar({ list, setList, expanded, setExpanded, mobileOp
 
     return (
         <>
-            <div className={`fixed top-0 left-0 h-full bg-white px-5 z-50 transform transition-transform duration-300 shadow-lg ${expanded || mobileOpen ? "translate-x-0" : "-translate-x-full"} w-full lg:w-120`} >
+            <div className={`fixed top-0 left-0 h-full bg-white px-5 z-50 transform transition-transform duration-300 shadow-lg overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-white [&::-webkit-scrollbar-thumb]:bg-indigo-100 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-button]:hidden [scrollbar-width:thin] [scrollbar-color:#c7d2fe_#ffffff] ${expanded || mobileOpen ? "translate-x-0" : "-translate-x-full"} w-full lg:w-120`} >
 
                 {/* Heading */}
                 <div className="py-4 flex justify-between items-center flex-wrap">
@@ -284,64 +284,88 @@ export default function Sidebar({ list, setList, expanded, setExpanded, mobileOp
                     {/* Filter button */}
                     {/* <button className="flex items-center gap-4 mt-3 active:shadow-sm bg-white border border-gray-200 transition duration-100 text-black text-[13px] px-3 py-3 rounded"> <LuSettings2 size={17} className="text-indigo-600" /> Filters</button> */}
 
-                    <div className="w-full max-w-[400px] h-70 bg-white mt-8">
-                        <ResponsiveContainer width="100%" height="100%">
-                            {parties && parties.length > 0 ? (
-                                <PieChart>
-                                    <Pie
-                                        data={parties.map(p => ({ ...p, castedVotes: Number(p.castedVotes) }))}
-                                        dataKey="castedVotes"
-                                        nameKey="name"
-                                        cx="50%"
-                                        cy="50%"
-                                        outerRadius={70}
-                                        innerRadius={30}
-                                        paddingAngle={3}
-                                    >
-                                        {parties.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.color || "#6366F1"} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip
-                                        formatter={(value) => [value, "Votes"]}
-                                        contentStyle={{ backgroundColor: "#f9fafb", borderRadius: "8px", border: "1px solid #e5e7eb" }}
-                                    />
-                                    <Legend
-                                        verticalAlign="bottom"
-                                        height={36}
-                                        iconType="circle"
-                                        wrapperStyle={{ fontSize: "12px" }}
-                                    />
-                                </PieChart>
-                            ) : (
-                                <div className="flex justify-center items-center h-full text-gray-500 text-sm">
-                                    Click add vote to fill out the fields
-                                </div>
-                            )}
-                        </ResponsiveContainer>
-
-                        {/* Winner info */}
-                        {parties.length > 0 && (
-                            <div className="mt-4 text-center text-sm">
-                                <p className="font-semibold text-indigo-600">
-                                    Winner:{" "}
-                                    {parties.reduce((max, p) =>
-                                        Number(p.castedVotes) > Number(max.castedVotes) ? p : max
-                                    ).name || "N/A"}
-                                </p>
-                                <p className="text-gray-500">
-                                    Votes:{" "}
-                                    {electionMeta.totalCastedVotes || 0} / {parties.reduce((max, p) =>
-                                        Number(p.castedVotes) > Number(max.castedVotes) ? p : max
-                                    ).castedVotes || 0}{" "}
-
-                                </p>
+                    {/* Multiple pie chart according to street */}
+                    <div className="w-full mt-8">
+                        {parties.length === 0 ? (
+                            <div className="flex justify-center items-center h-40 text-gray-500 text-sm">
+                                Click add vote to fill out the fields
                             </div>
+                        ) : (
+                            [...new Set(parties.map((p) => p.area))]
+                                .filter((street) => street)
+                                .map((street) => {
+                                    const streetParties = parties.filter((p) => p.area === street);
+
+                                    return (
+                                        <div key={street} className="mb-10">
+                                            <h3 className="text-center font-semibold text-indigo-600 mb-3 capitalize">
+                                                {street.replace(/_/g, " ")}
+                                            </h3>
+
+                                            <div className="w-full max-w-[400px] h-70 mx-auto bg-white">
+                                                <ResponsiveContainer width="100%" height="100%">
+                                                    <PieChart>
+                                                        <Pie
+                                                            data={streetParties.map((p) => ({
+                                                                ...p,
+                                                                castedVotes: Number(p.castedVotes),
+                                                            }))}
+                                                            dataKey="castedVotes"
+                                                            nameKey="name"
+                                                            cx="50%"
+                                                            cy="50%"
+                                                            outerRadius={70}
+                                                            innerRadius={30}
+                                                            paddingAngle={3}
+                                                        >
+                                                            {streetParties.map((entry, index) => (
+                                                                <Cell
+                                                                    key={`cell-${index}`}
+                                                                    fill={entry.color || "#6366F1"}
+                                                                />
+                                                            ))}
+                                                        </Pie>
+                                                        <Tooltip
+                                                            formatter={(value) => [value, "Votes"]}
+                                                            contentStyle={{
+                                                                backgroundColor: "#f9fafb",
+                                                                borderRadius: "8px",
+                                                                border: "1px solid #e5e7eb",
+                                                            }}
+                                                        />
+                                                        <Legend
+                                                            verticalAlign="bottom"
+                                                            height={36}
+                                                            iconType="circle"
+                                                            wrapperStyle={{ fontSize: "12px" }}
+                                                        />
+                                                    </PieChart>
+                                                </ResponsiveContainer>
+                                            </div>
+
+                                            {/* Winner Info */}
+                                            <div className="mt-3 text-center text-sm">
+                                                <p className="font-semibold text-indigo-600">
+                                                    Winner:{" "}
+                                                    {streetParties.reduce((max, p) =>
+                                                        Number(p.castedVotes) > Number(max.castedVotes) ? p : max
+                                                    ).name || "N/A"}
+                                                </p>
+                                                <p className="text-gray-500">
+                                                    Votes:{" "}
+                                                    {streetParties.reduce((max, p) =>
+                                                        Number(p.castedVotes) > Number(max.castedVotes) ? p : max
+                                                    ).castedVotes || 0}
+                                                    {" "} /{" "}
+                                                    {streetParties.reduce((sum, p) => sum + Number(p.castedVotes), 0)}
+                                                </p>
+
+                                            </div>
+                                        </div>
+                                    );
+                                })
                         )}
                     </div>
-
-
-
 
                 </div>
 
